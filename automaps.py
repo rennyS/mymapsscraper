@@ -1,64 +1,48 @@
 import requests
-from zipfile import ZipFile
 import xml.etree.ElementTree as ET
-import os
 import pandas as pd
+kml_url = ''
 
 
-
-def download_and_extract_kmz(url, extract_to='temp_kml'):
+def download_kml(url, save_to='temp_kml'):
     # Download the KMZ file from googlemymaps
     response = requests.get(url)
-    kmz_filename = 'temp.kmz'
-    with open(kmz_filename, 'wb') as file:
+    with open(save_to,'wb') as file:
         file.write(response.content)
+    return save_to
 
-    # Extract the KMZ file to temp folder
-    with ZipFile(kmz_filename, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
 
-    # Cleanup the downloaded KMZ file
-    os.remove(kmz_filename)
-    return extract_to
 
-def parse_kml_to_dataframe(directory):
-    # Find the KML file in the specified directory
-    kml_path = None
-    for filename in os.listdir(directory):
-        if filename.endswith('.kml'):
-            kml_path = os.path.join(directory, filename)
-            break
-
-    if not kml_path:
-        raise FileNotFoundError("No KML file found in the specified directory.")
+def parse_kml_to_dataframe(kml_file, desired_keys=None):
+    # If no specific keys provided, consider all keys
+    if desired_keys is None:
+        desired_keys = ['Approximate Attendance','Start Time','Date of Protest', 'City', 'Postcode']
 
     # Parse the KML file
-    tree = ET.parse(kml_path)
+    tree = ET.parse(kml_file)
     root = tree.getroot()
     
     # Namespace may be required for finding elements
     namespace = {'kml': 'http://www.opengis.net/kml/2.2'}
     
-    # create empty list to prepare for data
+    # Initialize an empty list to hold the parsed data
     data = []
 
-    # Go through each Placemark in the KML file (pin location)
+    # Iterate through each Placemark
     for placemark in root.findall('.//kml:Placemark', namespace):
-        # Initialize a dictionary to store the placemark's data
         placemark_data = {}
 
-        # Extract properties of each element in the placemark if not blank
+        # Extract simple properties
         placemark_data['Name'] = placemark.find('kml:name', namespace).text if placemark.find('kml:name', namespace) is not None else None
         placemark_data['Address'] = placemark.find('kml:address', namespace).text if placemark.find('kml:address', namespace) is not None else None
-        placemark_data['Description'] = placemark.find('kml:description', namespace).text if placemark.find('kml:description', namespace) is not None else None
+
         
-        # Extract the extended data
+        # Extract ExtendedData only for desired keys
         for data_element in placemark.findall('.//kml:ExtendedData/kml:Data', namespace):
-            # Use the 'name' attribute of the <Data> tag as the key
             key = data_element.get('name')
-            # Use the text of the <value> tag as the value
-            value = data_element.find('kml:value', namespace).text if data_element.find('kml:value', namespace) is not None else None
-            placemark_data[key] = value
+            if key in desired_keys or not desired_keys:
+                value = data_element.find('kml:value', namespace).text if data_element.find('kml:value', namespace) is not None else None
+                placemark_data[key] = value
         
         # Add the dictionary to our list of data
         data.append(placemark_data)
@@ -66,14 +50,33 @@ def parse_kml_to_dataframe(directory):
     # Convert the list of dictionaries to a DataFrame
     df = pd.DataFrame(data)
     return df
+    
+def correct_attendance(value):
+    # Corrects "Oct-50" to "10-50"
+    if value == "Oct-50":
+        return "10-50"
+    if value =="1-Oct":
+        return "1-10"
+    return value
+
+# Assuming 'df' is your DataFrame after parsing the KML
+# Apply correction to the 'Approximate Attendance' column
+
+
+# Now, df has the corrected values for "Approximate Attendance"
+
 
 # URL of the KMZ file to be downloaded and parsed
-url = 'URL OF KMZ'
-directory = download_and_extract_kmz(url)
-df = parse_kml_to_dataframe(directory)
 
-# Specify the path to save the CSV file
-csv_file_path = os.path.join(directory, 'parsed_data.csv')
+kml_file = download_kml(kml_url)
+
+desired_keys = ['Approximate Attendance','Start Time','Date of Protest', 'City', 'Postcode']
+# Call the parsing function with the list of desired keys
+df = parse_kml_to_dataframe(kml_file, desired_keys)
+df['Approximate Attendance'] = df['Approximate Attendance'].apply(correct_attendance)
+df['Approximate Attendance'] = df['Approximate Attendance'].fillna('N/A')
+# Proceed to save the DataFrame to CSV as before
+csv_file_path = 'filtered_data.csv'
 df.to_csv(csv_file_path, index=False)
 
-print(f"Data saved to {csv_file_path}")
+print(f"Filtered data saved to {csv_file_path}")
