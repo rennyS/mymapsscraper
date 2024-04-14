@@ -21,7 +21,7 @@ This project provides a Python script that automates interactions with Google Ea
 2. git clone https://github.com/rennyS/mymapsscraper.git
 
 2. Install the required dependencies:
-pip install selenium
+```pip install selenium```
 
 3. Download the geckodriver executable for Firefox and set the paths in the script.
 
