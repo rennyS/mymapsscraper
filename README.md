@@ -1,6 +1,6 @@
 # Google Earth Automation with Selenium
 
-Automate interactions with Google Earth using Selenium in Python.
+Automate downloading of KML by navigating to google earth page from google mymaps url.
 
 ## Description
 
