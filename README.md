@@ -28,8 +28,7 @@ This project provides a Python script that automates interactions with Google Ea
 ## Usage
 
 1. Update the paths for `geckodriver`, custom Firefox profile, and Firefox binary in the script.
-2. Run the `main.py` script to start the automation process:
-3. ```python main.py```
+2. Run the `main.py` script to start the automation process: ```python main.py```
 
 
 ## License
