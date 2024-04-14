@@ -4,7 +4,7 @@ Automate downloading of KML by navigating to google earth page from google mymap
 
 ## Description
 
-This project provides a Python script that automates interactions with Google Earth using the Selenium WebDriver. The script navigates to a specific Google Maps link, performs various actions on the page, and interacts with Google Earth.
+This project provides a Python script that automates interactions with Google Maps and Google Earth using the Selenium WebDriver. The script navigates to a specific Google Maps link, commands it to use a specific hotkey, and then downloads the KML file for later use.
 
 ## Features
 
