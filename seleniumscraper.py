@@ -6,31 +6,56 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import time
-import json
-import os
+
 
 class GoogleEarthAutomation:
+    """
+    Class to automate the opening of a Google Maps page in Google Earth
+
+    Attributes:
+        geckodriver_path (str): Path to the geckodriver executable
+        custom_profile_path (str): Path to the custom Firefox profile to use
+        firefox_binary_path (str): Path to the Firefox binary executable
+        driver (webdriver.Firefox): The headless Firefox webdriver instance
+    """
     def __init__(self, geckodriver_path, custom_profile_path, firefox_binary_path):
+        """
+        Initialise the GoogleEarthAutomation class
+
+        Arguments:
+            geckodriver_path (str): Path to the geckodriver executable
+            custom_profile_path (str): Path to the custom Firefox profile to use
+            firefox_binary_path (str): Path to the Firefox binary executable
+        """
         self.geckodriver_path = geckodriver_path
         self.custom_profile_path = custom_profile_path
         self.firefox_binary_path = firefox_binary_path
         self.driver = self.setup_driver()
 
     def setup_driver(self):
+        """
+        Setup the webdriver instance to be used for automation
+
+        Returns:
+            webdriver.Firefox: A headless Firefox webdriver instance
+        """
         options = Options()
+        # Set the browser to run in headless mode
         options.headless = True
+        # Set the path to the Firefox binary
         options.binary_location = self.firefox_binary_path
+        # Set the custom profile to be used
         options.profile = self.custom_profile_path
 
+        # Set the path to the geckodriver executable
         service = Service(self.geckodriver_path)
+        # Create a new Firefox webdriver instance
         driver = webdriver.Firefox(options=options, service=service)
         return driver
 
     def run_google_earth_automation(self):
-        self.driver.get('MAPS_URL_HERE')
+        self.driver.get('https://www.google.com/maps/d/viewer?mid=1U51M8KYT6NgT8TNrfUCPxRGRgj-deZU&ll=54.17131499483824%2C-1.2018284499999936&z=4')
         time.sleep(4)
-        with open('local_storage_data.json', 'r') as file:
-            updated_value = file.read()
 
         container_div = self.driver.find_element(By.CSS_SELECTOR, "div.mU4ghb-xl07Ob-LgbsSe[jscontroller='GC9WS']")
         container_div.click()
@@ -48,20 +73,13 @@ class GoogleEarthAutomation:
         js_code = """
         window.localStorage.setItem('earth.HasSeenOnboardingDialog', 'true');
         """
+        
         self.driver.execute_script(js_code)
-
-        with open('cookies.json', 'r') as file:
-            cookies = json.load(file)
-        for cookie in cookies:
-            self.driver.add_cookie(cookie)
-
-        new_page_url = self.driver.current_url
-        time.sleep(2)
-        cookies = self.driver.get_cookies()
-        time.sleep(1)
+        time.sleep(3)
         webdriver.ActionChains(self.driver).key_down(Keys.CONTROL).send_keys('e').key_up(Keys.CONTROL).perform()
 
     def close_driver(self):
+        time.sleep(1)
         self.driver.quit()
 
 # Set the paths
