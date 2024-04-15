@@ -9,15 +9,6 @@ import time
 
 
 class GoogleEarthAutomation:
-    """
-    Class to automate the opening of a Google Maps page in Google Earth
-
-    Attributes:
-        geckodriver_path (str): Path to the geckodriver executable
-        custom_profile_path (str): Path to the custom Firefox profile to use
-        firefox_binary_path (str): Path to the Firefox binary executable
-        driver (webdriver.Firefox): The headless Firefox webdriver instance
-    """
     def __init__(self, geckodriver_path, custom_profile_path, firefox_binary_path):
         """
         Initialise the GoogleEarthAutomation class
