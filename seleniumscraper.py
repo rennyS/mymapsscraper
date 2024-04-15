@@ -75,7 +75,7 @@ class GoogleEarthAutomation:
 
 # Set the paths
 geckodriver_path = 'geckodriver.exe'
-custom_profile_path = r"C:\Users\laure\Documents\VSCode\webdriverprofile"
+custom_profile_path = r"webdriverprofile_folder"
 firefox_binary_path = r'C:\Program Files\Mozilla Firefox\firefox.exe'
 
 # Create an instance of the GoogleEarthAutomation class
